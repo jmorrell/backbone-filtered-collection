@@ -1,6 +1,6 @@
 # backbone-filtered-collection
 
-[![Build Status](https://secure.travis-ci.org/user/backbone-filtered-collection.png?branch=master)](http://travis-ci.org/user/backbone-filtered-collection)
+[![Build Status](https://secure.travis-ci.org/jmorrell/backbone-filtered-collection.png?branch=master)](http://travis-ci.org/user/backbone-filtered-collection)
 
 
 ## Installation
