@@ -43,29 +43,121 @@ describe('unfiltered collection', function() {
 });
 
 describe('subset of collection functionality', function() {
-  var filtered, superset;
+  var filtered, superset, testResult;
 
   beforeEach(function() {
+
+    var filteredResult = [
+      { a: 1, b: 2, c:'a' },
+      { a: 1, b: 3, c:'b' },
+      { a: 1, b: 3, c:'c' }
+    ];
+
     superset = new Backbone.Collection(mockData);
     filtered = new FilteredCollection(superset);
+
+    // filter by a = 1
+    filtered.filterBy({ a: 1 });
+
+    // Create a hand-made collection that is the same as the
+    // filtered result. Then test that we get the same result
+    // on all supported actions.
+    testResult = new Backbone.Collection(filteredResult);
   });
 
-  // TODO
-  // Collection subset that we should implement
+  it('get', function() {
+    testResult.each(function(model) {
+      assert(filtered.get(model.cid));
+      assert(testResult.get(model.cid) === filtered.get(model.cid));
+    });
+  });
 
-  // get
-  // at
-  // toJSON
-  // first
-  // last
-  // length
-  // map
-  // each
-  // forEach
+  it('at', function() {
+    assert(testResult.at(0) === filtered.at(0));
+    assert(testResult.at(1) === filtered.at(1));
+    assert(testResult.at(2) === filtered.at(2));
+  });
 
-  // slice
-  // where
-  // findWhere
+  it('toJSON', function() {
+    assert(testResult.toJSON() === filtered.toJSON());
+    assert(
+      JSON.stringify(testResult.toJSON()) === JSON.stringify(filtered.toJSON())
+    );
+  });
+
+  it('first', function() {
+    assert(testResult.first() === filtered.first());
+  });
+
+  it('last', function() {
+    assert(testResult.last() === filtered.last());
+  });
+
+  it('length', function() {
+    assert(testResult.length === filtered.length);
+  });
+
+  it('map', function() {
+    var fn = function(model) { return model.get('a'); };
+    assert(_.isEqual(testResult.map(fn), filtered.map(fn)));
+  });
+
+  it('map with context', function() {
+    var context = { a: 100 };
+    var fn = function(model) { return this.a; };
+    assert(_.isEqual(testResult.map(fn, context), filtered.map(fn, context)));
+    assert(_.isEqual(filtered.map(fn, context), [ 100, 100, 100 ]));
+  });
+
+  it('each', function() {
+    var calledA = [];
+    var calledB = [];
+
+    testResult.each(function(model) {
+      calledA.push(model.toJSON());
+    });
+
+    filtered.each(function(model) {
+      calledA.push(model.toJSON());
+    });
+
+    assert(calledA.length === 3);
+    assert(calledA.length === calledB.length);
+    assert(_.isEqual(calledA, calledB));
+  });
+
+  it('each with context', function() {
+    var calledA = [];
+    var calledB = [];
+    var context = { a: 100 };
+
+    testResult.each(function(model) {
+      calledA.push(this.a);
+    });
+
+    filtered.each(function(model) {
+      calledA.push(this.a);
+    });
+
+    assert(calledA.length === 3);
+    assert(calledA.length === calledB.length);
+    assert(_.isEqual(calledA, calledB));
+    assert(_.isEqual(calledA, [ 100, 100, 100 ]));
+  });
+
+  it('slice', function() {
+    assert(_.isEqual(testResult.slice(1), filtered.slice(1)));
+    assert(_.isEqual(testResult.slice(0, 1), filtered.slice(0, 1)));
+    assert(_.isEqual(testResult.slice(1, 1), filtered.slice(1, 1)));
+  });
+
+  it('where', function() {
+    assert(_.isEqual(testResult.where({ b: 2 }), filtered.where({ b: 2 })));
+  });
+
+  it('findWhere', function() {
+    assert(_.isEqual(testResult.findWhere({ b: 3 }), filtered.findWhere({ b: 3 })));
+  });
 
 });
 
@@ -455,6 +547,7 @@ describe('collection filtered with functions', function() {
     first.trigger('test');
     assert(called.length === 1);
   });
+
 });
 
 describe('filtering without a filter name', function() {
@@ -716,5 +809,4 @@ describe('getting access to the original superset', function() {
 
 // events
 // Need to define this.
-
 
