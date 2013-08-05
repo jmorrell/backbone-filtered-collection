@@ -8,46 +8,98 @@ var mockData = [
   { a: 2, b: 2, c:'3' }
 ];
 
-
 describe('unfiltered collection', function() {
-  var filtered, collection;
+  var filtered, superset;
 
   beforeEach(function() {
-    collection = new Backbone.Collection(mockData);
-    filtered = new FilteredCollection(collection);
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
   });
 
   it('has the same length as the original collection', function() {
-    assert.equal(collection.length, filtered.length);
+    assert(superset.length === filtered.length);
   });
 
   it('results in the same toJSON output', function() {
-    assert.equal(collection.toJSON(), filtered.toJSON());
+    assert(superset.toJSON() === filtered.toJSON());
   });
 
   it('has the same .first() output', function() {
-    assert.equal(collection.first(), filtered.first());
+    assert(superset.first() === filtered.first());
   });
 
   it('has the same .last() output', function() {
-    assert.equal(collection.last(), filtered.last());
+    assert(superset.last() === filtered.last());
   });
 
   it('has the same .at() output', function() {
-    assert.equal(collection.at(1), filtered.at(1));
-    assert.equal(collection.at(2), filtered.at(2));
-    assert.equal(collection.at(3), filtered.at(3));
-    assert.equal(collection.at(4), filtered.at(4));
+    assert(superset.at(0) === filtered.at(0));
+    assert(superset.at(1) === filtered.at(1));
+    assert(superset.at(2) === filtered.at(2));
+    assert(superset.at(3) === filtered.at(3));
+    assert(superset.at(4) === filtered.at(4));
+  });
+
+});
+
+describe('subset of collection functionality', function() {
+  var filtered, superset;
+
+  beforeEach(function() {
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
+  });
+
+  // TODO
+  // Collection subset that we should implement
+
+  // get
+  // at
+  // toJSON
+  // first
+  // last
+  // length
+  // map
+  // each
+  // forEach
+
+  // slice
+  // where
+  // findWhere
+
+});
+
+describe('reset unfiltered collection', function() {
+  var filtered, superset;
+
+  var resetData = [
+    { d: 1, e: 2, f:'a' },
+    { d: 1, e: 3, f:'b' },
+    { d: 1, e: 3, f:'c' },
+    { d: 2, e: 2, f:'3' }
+  ];
+
+  beforeEach(function() {
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
+  });
+
+  it('should update the filtered collection collection:reset', function() {
+    superset.reset(resetData);
+
+    assert(filtered.length === 4);
+    assert(superset.length === filtered.length);
+    assert(superset.toJSON() === filtered.toJSON());
   });
 
 });
 
 describe('collection filtered with objects, static values', function() {
-  var filtered, collection;
+  var filtered, superset;
 
   beforeEach(function() {
-    collection = new Backbone.Collection(mockData);
-    filtered = new FilteredCollection(collection);
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
   });
 
   it('should filter results on `filterBy`', function() {
@@ -129,7 +181,7 @@ describe('collection filtered with objects, static values', function() {
   it('filtered collection should contain the original backbone models', function() {
     filtered.filterBy('a = 1', { a: 1 });
 
-    var first = collection.first();
+    var first = superset.first();
     var filteredFirst = filtered.first();
 
     // The original model should be the model found in the
@@ -152,11 +204,11 @@ describe('collection filtered with objects, static values', function() {
 });
 
 describe('collection filtered with objects, function values', function() {
-  var filtered, collection;
+  var filtered, superset;
 
   beforeEach(function() {
-    collection = new Backbone.Collection(mockData);
-    filtered = new FilteredCollection(collection);
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
   });
 
   it('should filter results on `filterBy`', function() {
@@ -238,7 +290,7 @@ describe('collection filtered with objects, function values', function() {
   it('filtered collection should contain the original backbone models', function() {
     filtered.filterBy('a = 1', { a: function(val) { return val === 1; } });
 
-    var first = collection.first();
+    var first = superset.first();
     var filteredFirst = filtered.first();
 
     // The original model should be the model found in the
@@ -262,11 +314,11 @@ describe('collection filtered with objects, function values', function() {
 
 
 describe('collection filtered with functions', function() {
-  var filtered, collection;
+  var filtered, superset;
 
   beforeEach(function() {
-    collection = new Backbone.Collection(mockData);
-    filtered = new FilteredCollection(collection);
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
   });
 
   it('should filter results on `filterBy`', function() {
@@ -384,7 +436,7 @@ describe('collection filtered with functions', function() {
       return model.get('a') === 1;
     });
 
-    var first = collection.first();
+    var first = superset.first();
     var filteredFirst = filtered.first();
 
     // The original model should be the model found in the
@@ -405,12 +457,58 @@ describe('collection filtered with functions', function() {
   });
 });
 
+describe('filtering without a filter name', function() {
+  var filtered, superset;
+
+  beforeEach(function() {
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
+  });
+
+  it('should accept a filter with no name', function() {
+    filtered.filterBy({ a: 1 });
+
+    assert(filtered.length === 3);
+  });
+
+  it('should replace that filter if called again', function() {
+    filtered.filterBy({ a: 1 });
+    filtered.filterBy({ a: 2 });
+
+    assert(filtered.length === 2);
+  });
+
+  it('should remove that filter if removeFilter is called', function() {
+    filtered.filterBy({ a: 1});
+    filtered.removeFilter();
+
+    assert(filtered.length === superset.length);
+    assert(filtered.toJSON() === superset.toJSON());
+  });
+
+  it("shouldn't cause issues if named filters are added after", function() {
+    filtered.filterBy({ a: 1});
+    filtered.filterBy('named', { b: 2 });
+
+    assert(filtered.length === 1);
+
+    // This will remove the unnamed filter, leaving the named filter
+    filtered.removeFilter();
+    assert(filtered.length === 3);
+
+    // And then we can remove the unnamed filter as well
+    filtered.removeFilter('named');
+    assert(filtered.length === 5);
+  });
+
+});
+
 describe('changing a model in the superset', function() {
   var filtered, superset;
 
   beforeEach(function() {
     superset = new Backbone.Collection(mockData);
-    filtered = new FilteredCollection(collection);
+    filtered = new FilteredCollection(superset);
   });
 
   it('a model changes to fit the filter function', function() {
@@ -452,60 +550,171 @@ describe('changing a model in the superset', function() {
 });
 
 describe('forcing a refilter', function() {
+  var filtered, superset, count;
 
-  it('the whole collection', function() {
+  beforeEach(function() {
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
+    count = 0;
 
+    filtered.filterBy('first filter', function(model) {
+      count = count + 1;
+      return true;
+    });
+
+    filtered.filterBy('second filter', function(model) {
+      count = count + 1;
+      return true;
+    });
   });
 
-  it('a particular model', function() {
+  it('the whole collection', function() {
+    // Due to the two filters, count should be 2 * length
+    assert(count === 2 * superset.length);
 
+    // Trigger a refilter
+    filtered.refilter();
+
+    // Each of the functions should have been called again
+    // for each model. `count` should now be 4 * length
+    assert(count === 4 * superset.length);
+  });
+
+  it('a specific filter function', function() {
+    // Due to the two filters, count should be 2 * length
+    assert(count === 2 * superset.length);
+
+    // Trigger a refilter for only the first filter
+    filtered.refilter('first filter');
+
+    // Only the first filter should have been called again
+    // for each model. `count` should now be 3 * length
+    assert(count === 3 * superset.length);
+  });
+
+  it('should re-evaluate the filter', function() {
+    fitered.filterBy('third filter', { a: 1 });
+
+    assert(filtered.length === 3);
+
+    // This should not have re-run the counted filters
+    assert(count === 2 * superset.length);
+
+    var model = filtered.first();
+
+    // Change the target on the first model, but silence the event
+    model.set({ a: 2 }, { silent: true });
+
+    // The model should still be in the collection
+    assert(filtered.length === 3);
+    assert(filtered.first() === model);
+
+    // Now trigger a refilter on the third filter
+    filtered.refilter('third filter');
+
+    // This should not have re-run the counted filters
+    assert(count === 2 * superset.length);
+
+    // The model should no longer be in the collection
+    assert(filtered.length === 2);
+    assert(filtered.first() !== model);
+  });
+
+  it('should re-evaluate the filter when no name is passed', function() {
+    fitered.filterBy('third filter', { a: 1 });
+
+    assert(filtered.length === 3);
+
+    // This should not have re-run the counted filters
+    assert(count === 2 * superset.length);
+
+    var model = filtered.first();
+
+    // Change the target on the first model, but silence the event
+    model.set({ a: 2 }, { silent: true });
+
+    // The model should still be in the collection
+    assert(filtered.length === 3);
+    assert(filtered.first() === model);
+
+    // Now trigger a refilter of all filter functions
+    filtered.refilter();
+
+    // This should have re-run the counted filters
+    assert(count === 4 * superset.length);
+
+    // The model should no longer be in the collection
+    assert(filtered.length === 2);
+    assert(filtered.first() !== model);
   });
 
 });
 
-// adding a model?
-// deleting a model?
+describe('triggering a refilter on a model', function() {
+  var filtered, superset, count, lastModel;
+
+  beforeEach(function() {
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
+    count = 0;
+    lastModel = null;
+
+    filtered.filterBy(function(model) {
+      lastModel = model;
+      count = count + 1;
+      return true;
+    });
+  });
+
+  it('should call the filter function again when triggered', function() {
+    var model = filtered.first();
+
+    // The filter function should have been called once for each model
+    assert(count === superset.length);
+
+    // Trigger a refilter on this particular model
+    model.trigger('refilter');
+
+    // The filter function should have been run once more on this model
+    assert(count === superset.length + 1);
+    assert(lastModel === model);
+  });
+
+  it("should filter out a model that's changed", function() {
+    var model = filtered.first();
+
+    filtered.filterBy('filter', { a: 1 });
+
+    // Silently changing a model should have no effect
+    assert(filtered.length === 3);
+    model.set({ a: 2 }, { silent: true });
+    assert(filtered.length === 3);
+
+    // Trigger a refilter on this particular model
+    model.trigger('refilter');
+
+    // Now the filtered collection should be updated
+    assert(filtered.length === 2);
+  });
+
+});
+
+describe('getting access to the original superset', function() {
+  var filtered, superset;
+
+  beforeEach(function() {
+    superset = new Backbone.Collection(mockData);
+    filtered = new FilteredCollection(superset);
+  });
+
+  it('should return the original superset', function() {
+    assert(filtered.superset() === superset);
+  });
+
+});
+
+
 // events
-
-// Add optional filter key dependencies when using a function? This could be used
-// to make things more efficient
-// filtered.filterBy(filterFn, 'key', 'key2');
-// filtered.filterBy(filterFn, [ 'key', 'key2' ]);
-
-// Likely need to have a way to force a refilter
-// filtered.refilter();
-
-// A way to trigger re-filtering a particular model?
-// filtered.add(model);
-// model.set({ foo: 'bar' }, { silent: true });
-// model.trigger('refilter');
-
-// return the superset
-// filtered.superset()
-
-// Collection subset that we should implement
-
-// get
-// at
-// toJSON
-// length
-// map
-// each
-// forEach
-
-// slice
-// where
-// findWhere
-
-
-
-
-
-
-
-
-
-
-
+// Need to define this.
 
 
