@@ -21,7 +21,7 @@ describe('unfiltered collection', function() {
   });
 
   it('results in the same toJSON output', function() {
-    assert(superset.toJSON() === filtered.toJSON());
+    assert(_.isEqual(superset.toJSON(), filtered.toJSON()));
   });
 
   it('has the same .first() output', function() {
@@ -42,7 +42,7 @@ describe('unfiltered collection', function() {
 
 });
 
-describe('subset of collection functionality', function() {
+describe('subset of collection functionality on filtered collection', function() {
   var filtered, superset, testResult;
 
   beforeEach(function() {
@@ -62,7 +62,7 @@ describe('subset of collection functionality', function() {
     // Create a hand-made collection that is the same as the
     // filtered result. Then test that we get the same result
     // on all supported actions.
-    testResult = new Backbone.Collection(filteredResult);
+    testResult = new Backbone.Collection(superset.slice(0, 3));
   });
 
   it('get', function() {
@@ -79,7 +79,7 @@ describe('subset of collection functionality', function() {
   });
 
   it('toJSON', function() {
-    assert(testResult.toJSON() === filtered.toJSON());
+    assert(_.isEqual(testResult.toJSON(), filtered.toJSON()));
     assert(
       JSON.stringify(testResult.toJSON()) === JSON.stringify(filtered.toJSON())
     );
@@ -118,7 +118,7 @@ describe('subset of collection functionality', function() {
     });
 
     filtered.each(function(model) {
-      calledA.push(model.toJSON());
+      calledB.push(model.toJSON());
     });
 
     assert(calledA.length === 3);
@@ -133,11 +133,11 @@ describe('subset of collection functionality', function() {
 
     testResult.each(function(model) {
       calledA.push(this.a);
-    });
+    }, context);
 
     filtered.each(function(model) {
-      calledA.push(this.a);
-    });
+      calledB.push(this.a);
+    }, context);
 
     assert(calledA.length === 3);
     assert(calledA.length === calledB.length);
@@ -181,7 +181,7 @@ describe('reset unfiltered collection', function() {
 
     assert(filtered.length === 4);
     assert(superset.length === filtered.length);
-    assert(superset.toJSON() === filtered.toJSON());
+    assert(_.isEqual(superset.toJSON(), filtered.toJSON()));
   });
 
 });
