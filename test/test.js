@@ -655,7 +655,7 @@ describe('filtered collection', function() {
     });
 
     it('should re-evaluate the filter', function() {
-      fitered.filterBy('third filter', { a: 1 });
+      filtered.filterBy('third filter', { a: 1 });
 
       assert(filtered.length === 3);
 
@@ -683,7 +683,7 @@ describe('filtered collection', function() {
     });
 
     it('should re-evaluate the filter when no name is passed', function() {
-      fitered.filterBy('third filter', { a: 1 });
+      filtered.filterBy('third filter', { a: 1 });
 
       assert(filtered.length === 3);
 
