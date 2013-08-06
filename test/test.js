@@ -733,7 +733,7 @@ describe('filtered collection', function() {
       assert(count === superset.length);
 
       // Trigger a refilter on this particular model
-      model.trigger('refilter');
+      filtered.refilter(model);
 
       // The filter function should have been run once more on this model
       assert(count === superset.length + 1);
@@ -751,7 +751,7 @@ describe('filtered collection', function() {
       assert(filtered.length === 3);
 
       // Trigger a refilter on this particular model
-      model.trigger('refilter');
+      filtered.refilter(model);
 
       // Now the filtered collection should be updated
       assert(filtered.length === 2);

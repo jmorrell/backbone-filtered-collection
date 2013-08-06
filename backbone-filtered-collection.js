@@ -96,6 +96,16 @@ var methods = {
 
   superset: function() {
     return this._superset;
+  },
+
+  refilter: function(arg) {
+    if (typeof arg === "string") {
+      // refilter that filter function
+    } else if (typeof arg === "object" && arg.cid) {
+      // is backbone model, refilter that one
+    } else if (!arg) {
+      // refilter everything
+    }
   }
 
 };
