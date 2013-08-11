@@ -8,8 +8,9 @@ var mockData = [
   { a: 2, b: 2, c:'3' }
 ];
 
+var filtered, superset;
+
 describe('filtered collection', function() {
-  var filtered, superset;
 
   beforeEach(function() {
     superset = new Backbone.Collection(mockData);
