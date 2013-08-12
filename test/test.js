@@ -614,6 +614,50 @@ describe('filtered collection', function() {
 
   });
 
+  describe('removing a model in the superset', function() {
+
+    it("no update when already filtered", function() {
+      // Add a filter on the 'a' key
+      // This leaves 3 models
+      filtered.filterBy('a = 1', { a: 1 });
+
+      // The last model in the set should have a = 2
+      // and not be present in the filtered collection
+      var lastModel = superset.last();
+      assert(lastModel.get('a') === 2);
+      assert(filtered.contains(lastModel) === false);
+      assert(filtered.length === 3);
+
+      // Now we remove it from the superset
+      superset.remove(lastModel);
+      
+      // And the filtered subset should stay the same
+      assert(filtered.contains(lastModel) === false);
+      assert(filtered.length === 3);
+    });
+
+    it("update when not already filtered", function() {
+      // Add a filter on the 'a' key
+      // This leaves 3 models
+      filtered.filterBy('a = 1', { a: 1 });
+
+      // The first model in the set should have a = 1
+      // and be present in the filtered collection
+      var firstModel = superset.first();
+      assert(firstModel.get('a') === 1);
+      assert(filtered.contains(firstModel));
+      assert(filtered.length === 3);
+
+      // Now we remove it from the superset
+      superset.remove(firstModel);
+
+      // And the filtered subset should update
+      assert(filtered.contains(firstModel) === false);
+      assert(filtered.length === 2);
+    });
+
+  });
+
   describe('forcing a refilter', function() {
     var count;
 

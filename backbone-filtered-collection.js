@@ -61,8 +61,12 @@ function createFilterObject(filterFunction, keys) {
   return { fn: filterFunction, keys: keys };
 }
 
-// TODO: Describe the three otions for filter, and how it works
-function convertFilterToFunction(filter, keys) {
+// Expects one of the following:
+//
+//   - A filter function that accepts a model + (optional) array of
+//     keys to listen to changes for or null)
+//   - An object describing a filter
+function createFilter(filter, keys) {
   // This must go first because _.isObject(fn) === true
   if (_.isFunction(filter)) {
     return createFilterObject(filter, keys);
@@ -75,14 +79,73 @@ function convertFilterToFunction(filter, keys) {
   }
 }
 
-function filterFunction(model) {
-  var bools = _.map(this._filters, function(filter, key) {
-    return filter(model);
-  });
 
-  // The model passes if all of the tests were `true`, false otherwise.
-  // This will return true when bools is an empty array.
-  return _.all(bools, _.identity);
+// Beware of `this`
+// All of the following functions are meant to be called in the context
+// of the FilteredCollection object, but are not public functions.
+
+function addFilter(filterName, filterObj) {
+  this._filters[filterName] = filterObj;
+  runFilter.call(this, filterName);
+  this.trigger('new-filter', filterName);
+}
+
+function removeFilter(filterName) {
+  delete this._filters[filterName];
+  for (var cid in this._filterResultCache) {
+    if (this._filterResultCache.hasOwnProperty(cid)) {
+      delete this._filterResultCache[cid][filterName];
+    }
+  }
+  this.trigger('filter-removed', filterName);
+}
+
+function runFilter(filterName) {
+  this._superset.each(function(model) {
+    runFilterOnModel.call(this, filterName, model);
+  }, this);
+}
+
+function runFilters() {
+  _.each(this._filters, function(val, filterName) {
+    runFilter.call(this, filterName);
+  }, this);
+}
+
+function runFiltersOnModel(model, changes) {
+  this._filterResultCache[model.cid] = {};
+  _.each(this._filters, function(filterObj, filterName) {
+    runFilterOnModel.call(this, filterName, model, changes);
+  }, this);
+}
+
+function runFilterOnModel(filterName, model, changes) {
+  var filterObj = this._filters[filterName];
+
+  if (_.isArray(changes) && _.isArray(filterObj.keys)) {
+    var results = _.map(changes, function(key) {
+      return _.contains(filterObj.keys, key);
+    });
+
+    if (!_.any(results) && _.has(this._filterResultCache[model.cid], filterName)) {
+      return this._filterResultCache[model.cid][filterName];
+    }
+  }
+
+  if (!this._filterResultCache[model.cid]) {
+    this._filterResultCache[model.cid] = {};
+  }
+  this._filterResultCache[model.cid][filterName] = filterObj.fn(model);
+}
+
+function filterFunction(model) {
+  // We only want to check the current filters
+  for (var filterName in this._filters) {
+    if (!this._filterResultCache[model.cid][filterName]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function filter() {
@@ -97,6 +160,25 @@ function filter() {
   this.length = this._collection.length;
 }
 
+function onModelChange(model) {
+  var changes = _.keys(model.changed);
+  runFiltersOnModel.call(this, model, changes);
+  filter.call(this);
+}
+
+function onModelAdd(model) {
+  runFiltersOnModel.call(this, model);
+  filter.call(this);
+  this.length = this._collection.length;
+}
+
+function onModelRemove(model) {
+  if (this.contains(model)) {
+    this._collection.remove(model);
+  }
+  this.length = this._collection.length;
+}
+
 function Filtered(superset, CollectionType) {
   // Allow the user to pass in a custom Collection type
   CollectionType = CollectionType || Backbone.Collection;
@@ -104,19 +186,22 @@ function Filtered(superset, CollectionType) {
   // Save a reference to the original collection
   this._superset = superset;
 
-  // This is where we will register our filter functions
-  this._filters = {};
-
   // The idea is to keep an internal backbone collection with the filtered
   // set, and expose limited functionality.
   this._collection = new CollectionType(superset.toArray());
+
+  // Set up the filter data structures
+  this.resetFilters();
 
   // A drawback is that we will have to update the length ourselves
   // every time we modify this collection.
   this.length = this._collection.length;
 
   this.on('change', filter, this);
-  this._superset.on('change reset add', filter, this);
+  this._superset.on('reset', filter, this);
+  this._superset.on('add', onModelAdd, this);
+  this._superset.on('change', onModelChange, this);
+  this._superset.on('remove', onModelRemove, this);
 }
 
 var methods = {
@@ -130,8 +215,8 @@ var methods = {
       filterName = this.defaultFilterName;
     }
 
-    this._filters[filterName] = convertFilterToFunction(filter, keys).fn;
-
+    addFilter.call(this, filterName, createFilter(filter, keys));
+    
     this.trigger('change');
     return this;
   },
@@ -140,7 +225,8 @@ var methods = {
     if (!filterName) {
       filterName = this.defaultFilterName;
     }
-    delete this._filters[filterName];
+
+    removeFilter.call(this, filterName);
 
     this.trigger('change');
     return this;
@@ -148,6 +234,10 @@ var methods = {
 
   resetFilters: function() {
     this._filters = {};
+    this._filterResultCache = {};
+    this._collection.each(function(model) {
+      this._filterResultCache[model.cid] = {};
+    }, this);
 
     this.trigger('change');
     return this;
@@ -158,13 +248,18 @@ var methods = {
   },
 
   refilter: function(arg) {
-    if (typeof arg === "string") {
+    if (typeof arg === "string" && this._filters[arg]) {
       // refilter that filter function
+      runFilter.call(this, arg);
     } else if (typeof arg === "object" && arg.cid) {
       // is backbone model, refilter that one
+      onModelChange.call(this, arg);
     } else if (!arg) {
       // refilter everything
+      runFilters.call(this);
     }
+    this.trigger('change');
+    return this;
   }
 
 };
