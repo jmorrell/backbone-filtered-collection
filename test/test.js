@@ -262,7 +262,7 @@ describe('filtered collection', function() {
     it('filters with the same name should replace each other', function() {
       filtered.filterBy('a filter', { a: 1 });
       assert(filtered.length === 3);
-        
+
       filtered.filterBy('a filter', { a: 3 });
       assert(filtered.length === 0);
     });
@@ -365,7 +365,7 @@ describe('filtered collection', function() {
     it('filters with the same name should replace each other', function() {
       filtered.filterBy('a filter', { a: function(val) { return val === 1; } });
       assert(filtered.length === 3);
-        
+
       filtered.filterBy('a filter', { a: function(val) { return val === 3; } });
       assert(filtered.length === 0);
     });
@@ -500,7 +500,7 @@ describe('filtered collection', function() {
         return model.get('a') === 1;
       });
       assert(filtered.length === 3);
-        
+
       filtered.filterBy('a filter', function(model) {
         return model.get('a') === 3;
       });
@@ -630,7 +630,7 @@ describe('filtered collection', function() {
 
       // Now we remove it from the superset
       superset.remove(lastModel);
-      
+
       // And the filtered subset should stay the same
       assert(filtered.contains(lastModel) === false);
       assert(filtered.length === 3);
@@ -803,9 +803,29 @@ describe('filtered collection', function() {
     });
 
   });
-  
+
+  // If you destroy a model in the superset
+
+  // If the orignal model syncs
+
   // events
   // Need to define this.
+
+  // We need to pipe any events from the filtered set to the outer object
+  //   - add
+  //   - remove
+  //   - reset
+  //   - change
+  //   - reset
+
+  // Filter-specific events
+
+  // before:filter
+  // after:filter
+
+  // add:filter
+  // remove:filter
+  // reset:filter
 
 });
 
