@@ -148,9 +148,9 @@ function filterFunction(model) {
   return true;
 }
 
-function filter() {
+function execFilter() {
   var filtered = [];
-  
+
   // Filter the collection
   if (this._superset) {
     filtered = this._superset.filter(_.bind(filterFunction, this));
@@ -163,12 +163,12 @@ function filter() {
 function onModelChange(model) {
   var changes = _.keys(model.changed);
   runFiltersOnModel.call(this, model, changes);
-  filter.call(this);
+  execFilter.call(this);
 }
 
 function onModelAdd(model) {
   runFiltersOnModel.call(this, model);
-  filter.call(this);
+  execFilter.call(this);
   this.length = this._collection.length;
 }
 
@@ -197,8 +197,7 @@ function Filtered(superset, CollectionType) {
   // every time we modify this collection.
   this.length = this._collection.length;
 
-  this.on('change', filter, this);
-  this._superset.on('reset', filter, this);
+  this._superset.on('reset', execFilter, this);
   this._superset.on('add', onModelAdd, this);
   this._superset.on('change', onModelChange, this);
   this._superset.on('remove', onModelRemove, this);
@@ -216,8 +215,8 @@ var methods = {
     }
 
     addFilter.call(this, filterName, createFilter(filter, keys));
-    
-    this.trigger('change');
+
+    execFilter.call(this);
     return this;
   },
 
@@ -228,7 +227,7 @@ var methods = {
 
     removeFilter.call(this, filterName);
 
-    this.trigger('change');
+    execFilter.call(this);
     return this;
   },
 
@@ -239,7 +238,7 @@ var methods = {
       this._filterResultCache[model.cid] = {};
     }, this);
 
-    this.trigger('change');
+    execFilter.call(this);
     return this;
   },
 
@@ -258,7 +257,8 @@ var methods = {
       // refilter everything
       runFilters.call(this);
     }
-    this.trigger('change');
+
+    execFilter.call(this);
     return this;
   }
 
