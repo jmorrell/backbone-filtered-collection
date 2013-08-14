@@ -657,6 +657,50 @@ describe('filtered collection', function() {
     });
 
   });
+  //
+  describe('destroying a model in the superset', function() {
+
+    it("no update when already filtered", function() {
+      // Add a filter on the 'a' key
+      // This leaves 3 models
+      filtered.filterBy('a = 1', { a: 1 });
+
+      // The last model in the set should have a = 2
+      // and not be present in the filtered collection
+      var lastModel = superset.last();
+      assert(lastModel.get('a') === 2);
+      assert(filtered.contains(lastModel) === false);
+      assert(filtered.length === 3);
+
+      // Now we *destory it!*
+      lastModel.destroy();
+
+      // And the filtered subset should stay the same
+      assert(filtered.contains(lastModel) === false);
+      assert(filtered.length === 3);
+    });
+
+    it("update when not already filtered", function() {
+      // Add a filter on the 'a' key
+      // This leaves 3 models
+      filtered.filterBy('a = 1', { a: 1 });
+
+      // The first model in the set should have a = 1
+      // and be present in the filtered collection
+      var firstModel = superset.first();
+      assert(firstModel.get('a') === 1);
+      assert(filtered.contains(firstModel));
+      assert(filtered.length === 3);
+
+      // Now we *destory it!*
+      firstModel.destroy();
+
+      // And the filtered subset should update
+      assert(filtered.contains(firstModel) === false);
+      assert(filtered.length === 2);
+    });
+
+  });
 
   describe('forcing a refilter', function() {
     var count;
@@ -804,28 +848,168 @@ describe('filtered collection', function() {
 
   });
 
-  // If you destroy a model in the superset
+  describe('Pipe events from the subset to the container', function() {
+    var resetData = [
+      { d: 1, e: 2, f:'a' },
+      { d: 1, e: 3, f:'b' },
+      { d: 1, e: 3, f:'c' },
+      { d: 2, e: 2, f:'3' }
+    ];
 
-  // If the orignal model syncs
+    it('add event', function() {
+      var model = new Backbone.Model({ a: 2 });
 
-  // events
-  // Need to define this.
+      var called = false;
+      filtered.on('add', function(m, collection) {
+        assert(m === model);
+        assert(collection === filtered);
+        called = true;
+      });
 
-  // We need to pipe any events from the filtered set to the outer object
-  //   - add
-  //   - remove
-  //   - reset
-  //   - change
-  //   - reset
+      superset.add(model);
 
-  // Filter-specific events
+      assert(called);
+    });
 
-  // before:filter
-  // after:filter
+    it('remove event', function() {
+      var model = superset.first();
 
-  // add:filter
-  // remove:filter
-  // reset:filter
+      var called = false;
+      filtered.on('remove', function(m, collection) {
+        assert(m === model);
+        assert(collection === filtered);
+        called = true;
+      });
+
+      superset.remove(model);
+
+      assert(called);
+    });
+
+    it('reset event', function() {
+      var called = false;
+      filtered.on('reset', function(collection) {
+        assert(collection === filtered);
+        called = true;
+      });
+
+      superset.reset(resetData);
+
+      assert(called);
+    });
+
+    it('model change event', function() {
+      var model = superset.first();
+
+      var called = false;
+      filtered.on('change', function(m) {
+        assert(m === model);
+        called = true;
+      });
+
+      model.set({ a: 100 });
+
+      assert(called);
+    });
+
+    it('model change event: specify key', function() {
+      var model = superset.first();
+
+      var called = false;
+      filtered.on('change:a', function(m) {
+        assert(m === model);
+        called = true;
+      });
+
+      model.set({ a: 100 });
+
+      assert(called);
+    });
+
+  });
+
+  describe('filter-specific events', function() {
+
+    it('before:filter', function() {
+      var called = false;
+      filtered.on('before:filter', function() {
+        called = true;
+      });
+
+      filtered.filterBy(function(model) {
+        return true;
+      });
+
+      assert(called);
+    });
+
+    it('after:filter', function() {
+      var called = false;
+
+      filtered.on('after:filter', function() {
+        called = true;
+      });
+
+      filtered.filterBy(function(model) {
+        return true;
+      });
+
+      assert(called);
+    });
+
+    it('add:filter', function() {
+      var called = false;
+      var name;
+
+      filtered.on('add:filter', function(filterName) {
+        called = true;
+        name = filterName;
+      });
+
+      filtered.filterBy('foo', function(model) {
+        return true;
+      });
+
+      assert(called);
+      assert(name === 'foo');
+    });
+
+    it('remove:filter', function() {
+      var called = false;
+      var name;
+
+      filtered.on('remove:filter', function(filterName) {
+        called = true;
+        name = filterName;
+      });
+
+      filtered.filterBy('foo', function(model) {
+        return true;
+      });
+
+      filtered.removeFilter('foo');
+
+      assert(called);
+      assert(name === 'foo');
+    });
+
+    it('reset:filter', function() {
+      var called = false;
+
+      filtered.on('reset:filter', function() {
+        called = true;
+      });
+
+      filtered.filterBy('foo', function(model) {
+        return true;
+      });
+
+      filtered.resetFilters();
+
+      assert(called);
+    });
+
+  });
 
 });
 

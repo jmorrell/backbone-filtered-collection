@@ -87,7 +87,7 @@ function createFilter(filter, keys) {
 function addFilter(filterName, filterObj) {
   this._filters[filterName] = filterObj;
   runFilter.call(this, filterName);
-  this.trigger('new-filter', filterName);
+  this.trigger('add:filter', filterName);
 }
 
 function removeFilter(filterName) {
@@ -97,7 +97,7 @@ function removeFilter(filterName) {
       delete this._filterResultCache[cid][filterName];
     }
   }
-  this.trigger('filter-removed', filterName);
+  this.trigger('remove:filter', filterName);
 }
 
 function runFilter(filterName) {
@@ -149,6 +149,8 @@ function filterFunction(model) {
 }
 
 function execFilter() {
+  this.trigger('before:filter');
+
   var filtered = [];
 
   // Filter the collection
@@ -158,6 +160,8 @@ function execFilter() {
 
   this._collection.reset(filtered);
   this.length = this._collection.length;
+
+  this.trigger('after:filter');
 }
 
 function onModelChange(model) {
@@ -179,6 +183,19 @@ function onModelRemove(model) {
   this.length = this._collection.length;
 }
 
+function pipeEvents() {
+  var args = _.toArray(arguments);
+
+  // replace any references to `this._collection` with `this`
+  for (var i = 1; i < args.length; i++) {
+    if (args[i].toJSON && _.isEqual(args[i].toJSON(), this._collection.toJSON())) {
+      args[i] = this;
+    }
+  }
+
+  this.trigger.apply(this, args);
+}
+
 function Filtered(superset, CollectionType) {
   // Allow the user to pass in a custom Collection type
   CollectionType = CollectionType || Backbone.Collection;
@@ -197,10 +214,11 @@ function Filtered(superset, CollectionType) {
   // every time we modify this collection.
   this.length = this._collection.length;
 
-  this._superset.on('reset', execFilter, this);
-  this._superset.on('add', onModelAdd, this);
-  this._superset.on('change', onModelChange, this);
-  this._superset.on('remove', onModelRemove, this);
+  this.listenTo(this._superset, 'reset',  execFilter);
+  this.listenTo(this._superset, 'add',    onModelAdd);
+  this.listenTo(this._superset, 'change', onModelChange);
+  this.listenTo(this._superset, 'remove', onModelRemove);
+  this.listenTo(this._superset, 'all',    pipeEvents);
 }
 
 var methods = {
@@ -237,6 +255,8 @@ var methods = {
     this._collection.each(function(model) {
       this._filterResultCache[model.cid] = {};
     }, this);
+
+    this.trigger('reset:filter');
 
     execFilter.call(this);
     return this;
