@@ -218,7 +218,7 @@ function Filtered(superset, CollectionType) {
   this.listenTo(this._superset, 'add',    onModelAdd);
   this.listenTo(this._superset, 'change', onModelChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
-  this.listenTo(this._superset, 'all',    pipeEvents);
+  this.listenTo(this._collection, 'all',    pipeEvents);
 }
 
 var methods = {
@@ -287,7 +287,8 @@ var methods = {
 // Methods on `this._collection` we will expose to the outside world
 var collectionMethods = [
   'toJSON', 'first', 'last', 'at', 'get', 'map',
-  'each', 'slice', 'where', 'findWhere', 'contains'
+  'each', 'slice', 'where', 'findWhere', 'contains',
+  'indexOf'
 ];
 
 _.each(collectionMethods, function(method) {
