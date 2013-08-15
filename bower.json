@@ -14,8 +14,6 @@
   "devDependencies": {
     "chai": "*",
     "backbone": "~1.0.0",
-    "underscore": "~1.5.1",
-    "backbone.marionette": "~1.1.0",
-    "bootstrap": "~3.0.0-rc1"
+    "underscore": "~1.5.1"
   }
 }
