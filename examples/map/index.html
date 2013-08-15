@@ -6,8 +6,41 @@
     <link rel="stylesheet" href="css/leaflet.css" />
   </head>
   <body>
+
+    <script type="text/template" id="table">
+      <thead>
+        <tr>
+          <th>City</th>
+          <th>Postal Code</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </script>
+
+    <script type="text/template" id="table-row">
+      <tr>
+        <td><%= city %></td>
+        <td><%= postalCode %></td>
+      </tr>
+    </script>
+
+    <script type="text/template" id="empty-table">
+      <p>Nothing matches the filters</p>
+    </script>
+
     <div class="container">
       <h1>Cities Map Example</h1>
+
+      <div class="row">
+        <div class="span8">
+          <div class="table"></div>
+        </div>
+        <div class="span4">
+          <div class="map"></div>
+        </div>
+      </div>
+
     </div>
 
     <script src="js/underscore.js"></script>
@@ -15,6 +48,8 @@
     <script src="js/backbone.js"></script>
     <script src="js/backbone.marionette.js"></script>
     <script src="js/leaflet.js"></script>
+    <script src="../../backbone-filtered-collection.js"></script>
     <script src="js/ca-cities.js"></script>
+    <script src="js/script.js"></script>
   </body>
 </html>
