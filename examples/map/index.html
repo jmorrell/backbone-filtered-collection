@@ -4,18 +4,21 @@
     <title>Cities example</title>
     <link rel="stylesheet" href="css/bootstrap.css" />
     <link rel="stylesheet" href="css/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
 
     <script type="text/template" id="table">
-      <thead>
-        <tr>
-          <th>City</th>
-          <th>Postal Code</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
+      <table>
+        <thead>
+          <tr>
+            <th>City</th>
+            <th>Postal Code</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
     </script>
 
     <script type="text/template" id="table-row">
@@ -33,11 +36,11 @@
       <h1>Cities Map Example</h1>
 
       <div class="row">
-        <div class="span8">
+        <div class="col-sm-3">
           <div class="table"></div>
         </div>
-        <div class="span4">
-          <div class="map"></div>
+        <div class="col-sm-9">
+          <div id="map"></div>
         </div>
       </div>
 
