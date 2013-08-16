@@ -172,7 +172,11 @@ function onModelChange(model) {
 
 function onModelAdd(model) {
   runFiltersOnModel.call(this, model);
-  execFilter.call(this);
+
+  if (filterFunction.call(this, model)) {
+    this._collection.add(model);
+  }
+
   this.length = this._collection.length;
 }
 
@@ -188,7 +192,8 @@ function pipeEvents() {
 
   // replace any references to `this._collection` with `this`
   for (var i = 1; i < args.length; i++) {
-    if (args[i].toJSON && _.isEqual(args[i].toJSON(), this._collection.toJSON())) {
+    // TODO: Is there a better way to check for this? List all of the possible events?
+    if (args[i].models && args[i].models.length === this._collection.models.length) {
       args[i] = this;
     }
   }
@@ -196,16 +201,13 @@ function pipeEvents() {
   this.trigger.apply(this, args);
 }
 
-function Filtered(superset, CollectionType) {
-  // Allow the user to pass in a custom Collection type
-  CollectionType = CollectionType || Backbone.Collection;
-
+function Filtered(superset) {
   // Save a reference to the original collection
   this._superset = superset;
 
   // The idea is to keep an internal backbone collection with the filtered
   // set, and expose limited functionality.
-  this._collection = new CollectionType(superset.toArray());
+  this._collection = new Backbone.Collection(superset.toArray());
 
   // Set up the filter data structures
   this.resetFilters();
