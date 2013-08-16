@@ -926,6 +926,19 @@ describe('filtered collection', function() {
       assert(called);
     });
 
+    it('adding a new filter triggers a reset', function() {
+      var called = false;
+
+      filtered.on('reset', function(collection) {
+        assert(collection === filtered);
+        called = true;
+      });
+
+      filtered.filterBy({ a: 2 });
+
+      assert(called);
+    });
+
   });
 
   describe('filter-specific events', function() {
