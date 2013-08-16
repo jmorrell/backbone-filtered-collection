@@ -84,68 +84,35 @@ function createFilter(filter, keys) {
 // All of the following functions are meant to be called in the context
 // of the FilteredCollection object, but are not public functions.
 
-function addFilter(filterName, filterObj) {
-  this._filters[filterName] = filterObj;
-  runFilter.call(this, filterName);
-  this.trigger('add:filter', filterName);
+function invalidateCache() {
+  this._collection.each(function(model) {
+    this._filterResultCache[model.cid] = {};
+  }, this);
 }
 
-function removeFilter(filterName) {
-  delete this._filters[filterName];
+function invalidateCacheForFilter(filterName) {
   for (var cid in this._filterResultCache) {
     if (this._filterResultCache.hasOwnProperty(cid)) {
       delete this._filterResultCache[cid][filterName];
     }
   }
+}
+
+function addFilter(filterName, filterObj) {
+  // If we've already had a filter of this name, we need to invalidate
+  // any and all of the cached results
+  if (this._filters[filterName]) {
+    invalidateCacheForFilter.call(this, filterName);
+  }
+
+  this._filters[filterName] = filterObj;
+  this.trigger('add:filter', filterName);
+}
+
+function removeFilter(filterName) {
+  delete this._filters[filterName];
+  invalidateCacheForFilter.call(this, filterName);
   this.trigger('remove:filter', filterName);
-}
-
-function runFilter(filterName) {
-  this._superset.each(function(model) {
-    runFilterOnModel.call(this, filterName, model);
-  }, this);
-}
-
-function runFilters() {
-  _.each(this._filters, function(val, filterName) {
-    runFilter.call(this, filterName);
-  }, this);
-}
-
-function runFiltersOnModel(model, changes) {
-  this._filterResultCache[model.cid] = {};
-  _.each(this._filters, function(filterObj, filterName) {
-    runFilterOnModel.call(this, filterName, model, changes);
-  }, this);
-}
-
-function runFilterOnModel(filterName, model, changes) {
-  var filterObj = this._filters[filterName];
-
-  if (_.isArray(changes) && _.isArray(filterObj.keys)) {
-    var results = _.map(changes, function(key) {
-      return _.contains(filterObj.keys, key);
-    });
-
-    if (!_.any(results) && _.has(this._filterResultCache[model.cid], filterName)) {
-      return this._filterResultCache[model.cid][filterName];
-    }
-  }
-
-  if (!this._filterResultCache[model.cid]) {
-    this._filterResultCache[model.cid] = {};
-  }
-  this._filterResultCache[model.cid][filterName] = filterObj.fn(model);
-}
-
-function filterFunction(model) {
-  // We only want to check the current filters
-  for (var filterName in this._filters) {
-    if (!this._filterResultCache[model.cid][filterName]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function execFilter() {
@@ -155,7 +122,7 @@ function execFilter() {
 
   // Filter the collection
   if (this._superset) {
-    filtered = this._superset.filter(_.bind(filterFunction, this));
+    filtered = this._superset.filter(_.bind(execFilterOnModel, this));
   }
 
   this._collection.reset(filtered);
@@ -164,19 +131,40 @@ function execFilter() {
   this.trigger('after:filter');
 }
 
-function onModelChange(model) {
-  var changes = _.keys(model.changed);
-  runFiltersOnModel.call(this, model, changes);
-  execFilter.call(this);
-}
-
-function onModelAdd(model) {
-  runFiltersOnModel.call(this, model);
-
-  if (filterFunction.call(this, model)) {
-    this._collection.add(model);
+function execFilterOnModel(model) {
+  if (!this._filterResultCache[model.cid]) {
+    this._filterResultCache[model.cid] = {};
   }
 
+  var cache = this._filterResultCache[model.cid];
+
+  for (var filterName in this._filters) {
+    if (this._filters.hasOwnProperty(filterName)) {
+      // if we haven't already calculated this, calculate it and cache
+      if (!cache.hasOwnProperty(filterName)) {
+        cache[filterName] = this._filters[filterName].fn(model);
+      }
+      if (!cache[filterName]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function onModelChange(model) {
+  // reset the cached results
+  this._filterResultCache[model.cid] = {};
+
+  if (execFilterOnModel.call(this, model)) {
+    if (!this._collection.get(model.cid)) {
+      this._collection.add(model);
+    }
+  } else {
+    if (this._collection.get(model.cid)) {
+      this._collection.remove(model);
+    }
+  }
   this.length = this._collection.length;
 }
 
@@ -192,7 +180,8 @@ function pipeEvents() {
 
   // replace any references to `this._collection` with `this`
   for (var i = 1; i < args.length; i++) {
-    // TODO: Is there a better way to check for this? List all of the possible events?
+    // TODO: Is there a better way to check for this?
+    //       List all of the possible events?
     if (args[i].models && args[i].models.length === this._collection.models.length) {
       args[i] = this;
     }
@@ -217,7 +206,7 @@ function Filtered(superset) {
   this.length = this._collection.length;
 
   this.listenTo(this._superset, 'reset',  execFilter);
-  this.listenTo(this._superset, 'add',    onModelAdd);
+  this.listenTo(this._superset, 'add',    onModelChange);
   this.listenTo(this._superset, 'change', onModelChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
   this.listenTo(this._collection, 'all',    pipeEvents);
@@ -254,9 +243,7 @@ var methods = {
   resetFilters: function() {
     this._filters = {};
     this._filterResultCache = {};
-    this._collection.each(function(model) {
-      this._filterResultCache[model.cid] = {};
-    }, this);
+    invalidateCache.call(this);
 
     this.trigger('reset:filter');
 
@@ -269,18 +256,15 @@ var methods = {
   },
 
   refilter: function(arg) {
-    if (typeof arg === "string" && this._filters[arg]) {
-      // refilter that filter function
-      runFilter.call(this, arg);
-    } else if (typeof arg === "object" && arg.cid) {
+    if (typeof arg === "object" && arg.cid) {
       // is backbone model, refilter that one
       onModelChange.call(this, arg);
-    } else if (!arg) {
+    } else {
       // refilter everything
-      runFilters.call(this);
+      invalidateCache.call(this);
+      execFilter.call(this);
     }
 
-    execFilter.call(this);
     return this;
   }
 

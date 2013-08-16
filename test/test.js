@@ -731,46 +731,6 @@ describe('filtered collection', function() {
       assert(count === 4 * superset.length);
     });
 
-    it('a specific filter function', function() {
-      // Due to the two filters, count should be 2 * length
-      assert(count === 2 * superset.length);
-
-      // Trigger a refilter for only the first filter
-      filtered.refilter('first filter');
-
-      // Only the first filter should have been called again
-      // for each model. `count` should now be 3 * length
-      assert(count === 3 * superset.length);
-    });
-
-    it('should re-evaluate the filter', function() {
-      filtered.filterBy('third filter', { a: 1 });
-
-      assert(filtered.length === 3);
-
-      // This should not have re-run the counted filters
-      assert(count === 2 * superset.length);
-
-      var model = filtered.first();
-
-      // Change the target on the first model, but silence the event
-      model.set({ a: 2 }, { silent: true });
-
-      // The model should still be in the collection
-      assert(filtered.length === 3);
-      assert(filtered.first() === model);
-
-      // Now trigger a refilter on the third filter
-      filtered.refilter('third filter');
-
-      // This should not have re-run the counted filters
-      assert(count === 2 * superset.length);
-
-      // The model should no longer be in the collection
-      assert(filtered.length === 2);
-      assert(filtered.first() !== model);
-    });
-
     it('should re-evaluate the filter when no name is passed', function() {
       filtered.filterBy('third filter', { a: 1 });
 
@@ -790,9 +750,6 @@ describe('filtered collection', function() {
 
       // Now trigger a refilter of all filter functions
       filtered.refilter();
-
-      // This should have re-run the counted filters
-      assert(count === 4 * superset.length);
 
       // The model should no longer be in the collection
       assert(filtered.length === 2);
