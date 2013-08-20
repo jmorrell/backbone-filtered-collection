@@ -1,11 +1,26 @@
 {
   "name": "backbone-filtered-collection",
-  "description": "",
+  "description": "Create a filtered version of a backbone collection that stays in sync.",
   "version": "0.0.0",
-  "devDependencies": {
-    "karma": "~0.8.5"
+  "homepage": "http://github.com/jmorrell/backbone-filtered-collection",
+  "license": "MIT",
+  "keywords": [ "backbone", "plugin", "filtering", "filter", "collection", "client", "browser" ],
+  "author": {
+    "name": "Jeremy Morrell",
+    "email": "morrell.jeremy@gmail.com",
+    "url": "http://rathercurio.us"
+  },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/jmorrell/backbone-filtered-collection.git"
   },
   "scripts": {
     "test": "./node_modules/.bin/karma start --browsers Firefox --single-run"
+  },
+  "dependencies": {
+    "backbone": "~1.0.0"
+  },
+  "devDependencies": {
+    "karma": "~0.8.5"
   }
 }
