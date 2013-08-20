@@ -14,6 +14,14 @@ filtered.filterBy({ foo: "bar" });
 // A new model to the superset will automatically show up in the filtered
 // collection, firing an "add" event
 superset.add({ foo: "bar", baz: "qux" });
+
+// Also supports named multiple named filters and arbitrary functions
+filtered.filterBy('age-range', function(model) {
+  return model.get('age') > 17 && model.get('age') < 70;
+});
+
+// Remove a filter and the filtered collection will update
+filtered.removeFilter('age-range');
 ```
 
 ## Installation
@@ -58,7 +66,7 @@ on the global object.
 
 ##### new FilteredCollection
 
-Initialize a new FilteredCollection by passing in the original collection
+Initialize a new FilteredCollection by passing in the original collection.
 
 ```javascript
 var filtered = new FilteredCollection(originalCollection);
