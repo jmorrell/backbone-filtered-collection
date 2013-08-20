@@ -286,9 +286,6 @@ _.each(collectionMethods, function(method) {
 // Build up the prototype
 _.extend(Filtered.prototype, methods, Backbone.Events);
 
-// Expose the Backbone extend function
-Filtered.extend = Backbone.Collection.extend;
-
 return Filtered;
 
 // ---------------------------------------------------------------------------
