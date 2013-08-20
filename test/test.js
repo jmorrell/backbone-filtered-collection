@@ -900,33 +900,6 @@ describe('filtered collection', function() {
 
   describe('filter-specific events', function() {
 
-    it('before:filter', function() {
-      var called = false;
-      filtered.on('before:filter', function() {
-        called = true;
-      });
-
-      filtered.filterBy(function(model) {
-        return true;
-      });
-
-      assert(called);
-    });
-
-    it('after:filter', function() {
-      var called = false;
-
-      filtered.on('after:filter', function() {
-        called = true;
-      });
-
-      filtered.filterBy(function(model) {
-        return true;
-      });
-
-      assert(called);
-    });
-
     it('add:filter', function() {
       var called = false;
       var name;

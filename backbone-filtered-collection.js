@@ -116,8 +116,6 @@ function removeFilter(filterName) {
 }
 
 function execFilter() {
-  this.trigger('before:filter');
-
   var filtered = [];
 
   // Filter the collection
@@ -127,8 +125,6 @@ function execFilter() {
 
   this._collection.reset(filtered);
   this.length = this._collection.length;
-
-  this.trigger('after:filter');
 }
 
 function execFilterOnModel(model) {
@@ -180,8 +176,8 @@ function pipeEvents() {
 
   // replace any references to `this._collection` with `this`
   for (var i = 1; i < args.length; i++) {
-    // TODO: Is there a better way to check for this?
-    //       List all of the possible events?
+    // Is there a better way to check for this?
+    // List all of the possible events?
     if (args[i].models && args[i].models.length === this._collection.models.length) {
       args[i] = this;
     }
@@ -216,14 +212,14 @@ var methods = {
 
   defaultFilterName: '__default',
 
-  filterBy: function(filterName, filter, keys) {
+  filterBy: function(filterName, filter) {
     // Allow the user to skip the filter name if they're only using one filter
     if (!filter) {
       filter = filterName;
       filterName = this.defaultFilterName;
     }
 
-    addFilter.call(this, filterName, createFilter(filter, keys));
+    addFilter.call(this, filterName, createFilter(filter));
 
     execFilter.call(this);
     return this;
