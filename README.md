@@ -118,4 +118,7 @@ To run the tests in Firefox, just once, as CI would:
 npm test
 ```
 
+## License
+
+MIT
 
