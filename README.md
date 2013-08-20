@@ -64,7 +64,7 @@ on the global object.
 
 ## Methods
 
-##### new FilteredCollection
+#### new FilteredCollection
 
 Initialize a new FilteredCollection by passing in the original collection.
 
@@ -72,15 +72,68 @@ Initialize a new FilteredCollection by passing in the original collection.
 var filtered = new FilteredCollection(originalCollection);
 ```
 
-##### filtered.filterBy
+#### filtered.filterBy([filterName], filter)
 
-##### filtered.removeFilter
+Apply a new filter to the set. Takes an optional filter name.
 
-##### filtered.resetFilters
+Can be a simple object that defines required key / value pairs.
+```javascript
+filtered.filterBy('foo and bar filter', { foo: 2, bar: 3 });
+```
 
-##### filtered.superset
+Or the you can pass a filter function instead of a value.
+```javascript
+filtered.filterBy('a > 2', { a: function(val) { 
+  return val > 2;
+}});
+```
 
-##### filtered.refilter
+Or you can use an arbitrary filter function on the model itself.
+
+```javascript
+filtered.filterBy('age', function(model) {
+  return model.get('age') > 10 && model.get('age') < 40;
+});
+```
+
+#### filtered.removeFilter(filterName)
+
+Remove a previously applied filter. Accepts a filter name.
+
+```javascript
+filtered.removeFilter('age');
+```
+
+#### filtered.resetFilters()
+
+Removes all applied filters. After the collection should be the same as the superset.
+
+```javascript
+filtered.resetFilters();
+```
+
+#### filtered.superset()
+
+Return a reference to the original collection.
+
+```javascript
+filtered.superset();
+```
+
+#### filtered.refilter()
+
+If the collections get out of sync (ex: change events have been suppressed) force
+the collection to refilter all of the models.
+
+```javascript
+filtered.refilter();
+```
+
+Can also be forced to run on one model in particular.
+
+```javascript
+filtered.refilter(model);
+```
 
 ## Events
 
