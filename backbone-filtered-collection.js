@@ -270,7 +270,7 @@ var methods = {
 var collectionMethods = [
   'toJSON', 'first', 'last', 'at', 'get', 'map',
   'each', 'slice', 'where', 'findWhere', 'contains',
-  'indexOf', 'toArray'
+  'indexOf', 'toArray', 'pluck'
 ];
 
 _.each(collectionMethods, function(method) {
