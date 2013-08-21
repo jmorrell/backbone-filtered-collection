@@ -828,6 +828,21 @@ describe('filtered collection', function() {
       assert(called);
     });
 
+    it("no add event when the model doesn't fit the filter", function() {
+      filtered.filterBy({ a: 1 });
+
+      var model = new Backbone.Model({ a: 2 });
+
+      var called = false;
+      filtered.on('add', function(m, collection) {
+        called = true;
+      });
+
+      superset.add(model);
+
+      assert(!called);
+    });
+
     it('remove event', function() {
       var model = superset.first();
 
@@ -841,6 +856,25 @@ describe('filtered collection', function() {
       superset.remove(model);
 
       assert(called);
+    });
+
+    it("no remove event when the model doesn't fit the filter", function() {
+      filtered.filterBy({ a: 2 });
+      var model = superset.first();
+
+      assert(model.get('a') === 1);
+      assert(!filtered.contains(model));
+
+      var called = false;
+      filtered.on('remove', function(m, collection) {
+        assert(m === model);
+        assert(collection === filtered);
+        called = true;
+      });
+
+      superset.remove(model);
+
+      assert(!called);
     });
 
     it('reset event', function() {
@@ -869,6 +903,23 @@ describe('filtered collection', function() {
       assert(called);
     });
 
+    it("no model change event when the model doesn't fit the filter", function() {
+      filtered.filterBy({ a: 2 });
+      var model = superset.first();
+
+      assert(model.get('a') === 1);
+      assert(!filtered.contains(model));
+
+      var called = false;
+      filtered.on('change', function(m) {
+        called = true;
+      });
+
+      model.set({ a: 100 });
+
+      assert(!called);
+    });
+
     it('model change event: specify key', function() {
       var model = superset.first();
 
@@ -881,6 +932,23 @@ describe('filtered collection', function() {
       model.set({ a: 100 });
 
       assert(called);
+    });
+
+    it("no change event: key when the model doesn't fit the filter", function() {
+      filtered.filterBy({ a: 2 });
+      var model = superset.first();
+
+      assert(model.get('a') === 1);
+      assert(!filtered.contains(model));
+
+      var called = false;
+      filtered.on('change:a', function(m) {
+        called = true;
+      });
+
+      model.set({ a: 100 });
+
+      assert(!called);
     });
 
     it('adding a new filter triggers a reset', function() {
