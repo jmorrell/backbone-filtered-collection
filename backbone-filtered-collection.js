@@ -201,11 +201,11 @@ function Filtered(superset) {
   // every time we modify this collection.
   this.length = this._collection.length;
 
-  this.listenTo(this._superset, 'reset',  execFilter);
-  this.listenTo(this._superset, 'add',    onModelChange);
+  this.listenTo(this._superset, 'reset', execFilter);
+  this.listenTo(this._superset, 'add', onModelChange);
   this.listenTo(this._superset, 'change', onModelChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
-  this.listenTo(this._collection, 'all',    pipeEvents);
+  this.listenTo(this._collection, 'all', pipeEvents);
 }
 
 var methods = {
