@@ -139,11 +139,11 @@ filtered.refilter(model);
 
 `add`, `remove`, `change`, `reset` should fire as you expect.
 
-`add:filter` - Fired when a new filter is added. Passes the filter name.
+`filtered:add` - Fired when a new filter is added. Passes the filter name.
 
-`remove:filter` - Fired with a filter is removed. Passes the filter name.
+`filtered:remove` - Fired with a filter is removed. Passes the filter name.
 
-`reset:filter` - Fired when all of the filters are removed.
+`filtered:reset` - Fired when all of the filters are removed.
 
 ## Testing
 

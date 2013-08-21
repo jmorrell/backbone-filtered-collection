@@ -968,11 +968,11 @@ describe('filtered collection', function() {
 
   describe('filter-specific events', function() {
 
-    it('add:filter', function() {
+    it('filtered:add', function() {
       var called = false;
       var name;
 
-      filtered.on('add:filter', function(filterName) {
+      filtered.on('filtered:add', function(filterName) {
         called = true;
         name = filterName;
       });
@@ -985,11 +985,11 @@ describe('filtered collection', function() {
       assert(name === 'foo');
     });
 
-    it('remove:filter', function() {
+    it('filtered:remove', function() {
       var called = false;
       var name;
 
-      filtered.on('remove:filter', function(filterName) {
+      filtered.on('filtered:remove', function(filterName) {
         called = true;
         name = filterName;
       });
@@ -1004,10 +1004,10 @@ describe('filtered collection', function() {
       assert(name === 'foo');
     });
 
-    it('reset:filter', function() {
+    it('filtered:reset', function() {
       var called = false;
 
-      filtered.on('reset:filter', function() {
+      filtered.on('filtered:reset', function() {
         called = true;
       });
 

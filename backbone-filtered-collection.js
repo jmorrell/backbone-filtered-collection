@@ -106,13 +106,13 @@ function addFilter(filterName, filterObj) {
   }
 
   this._filters[filterName] = filterObj;
-  this.trigger('add:filter', filterName);
+  this.trigger('filtered:add', filterName);
 }
 
 function removeFilter(filterName) {
   delete this._filters[filterName];
   invalidateCacheForFilter.call(this, filterName);
-  this.trigger('remove:filter', filterName);
+  this.trigger('filtered:remove', filterName);
 }
 
 function execFilter() {
@@ -241,7 +241,7 @@ var methods = {
     this._filterResultCache = {};
     invalidateCache.call(this);
 
-    this.trigger('reset:filter');
+    this.trigger('filtered:reset');
 
     execFilter.call(this);
     return this;
