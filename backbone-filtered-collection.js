@@ -268,9 +268,13 @@ var methods = {
 
 // Methods on `this._collection` we will expose to the outside world
 var collectionMethods = [
-  'toJSON', 'first', 'last', 'at', 'get', 'map',
-  'each', 'slice', 'where', 'findWhere', 'contains',
-  'indexOf', 'toArray', 'pluck'
+  'toJSON', 'forEach', 'each', 'map', 'collect', 'reduce', 'foldl',
+  'inject', 'reduceRight', 'foldr', 'find', 'detect', 'filter', 'select',
+  'reject', 'every', 'all', 'some', 'any', 'include', 'contains', 'invoke',
+  'max', 'min', 'groupBy', 'sortedIndex', 'shuffle', 'toArray', 'size',
+  'first', 'head', 'take', 'initial', 'rest', 'tail', 'drop', 'last',
+  'without', 'indexOf', 'lastIndexOf', 'isEmpty', 'chain', 'pluck',
+  'findWhere', 'get', 'at', 'slice', 'where', 'findWhere'
 ];
 
 _.each(collectionMethods, function(method) {
