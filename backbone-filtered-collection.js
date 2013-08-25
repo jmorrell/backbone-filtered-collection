@@ -1,4 +1,4 @@
-/*! backbone-filtered-collection v0.0.0 - MIT license */
+/*! backbone-filtered-collection */
 ;(function (root) { function moduleDefinition(Backbone, _) {
 
 
