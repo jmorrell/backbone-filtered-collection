@@ -576,40 +576,116 @@ describe('filtered collection', function() {
 
   describe('changing a model in the superset', function() {
 
-    it('a model changes to fit the filter function', function() {
-      // Add a filter on the 'a' key
-      // This leaves 3 models
-      filtered.filterBy('a = 1', { a: 1 });
+    describe('a model changes to fit the filter function', function() {
 
-      // The last model in the set should have a = 2
-      // and not be present in the filtered collection
-      var lastModel = superset.last();
-      assert(lastModel.get('a') === 2);
-      assert(filtered.contains(lastModel) === false);
+      it('should be added to the filtered collection', function() {
+        // Add a filter on the 'a' key
+        // This leaves 3 models
+        filtered.filterBy('a = 1', { a: 1 });
 
-      // However if we change the 'a' parameter to 1,
-      // it should show up in the filtered collection
-      lastModel.set({ a: 1 });
-      assert(filtered.length === 4);
-      assert(filtered.contains(lastModel));
+        // The last model in the set should have a = 2
+        // and not be present in the filtered collection
+        var lastModel = superset.last();
+        assert(lastModel.get('a') === 2);
+        assert(filtered.contains(lastModel) === false);
+
+        // However if we change the 'a' parameter to 1,
+        // it should show up in the filtered collection
+        lastModel.set({ a: 1 });
+        assert(filtered.length === 4);
+        assert(filtered.contains(lastModel));
+      });
+
+      it('should not fire a change event', function() {
+        // Add a filter on the 'a' key
+        // This leaves 3 models
+        filtered.filterBy('a = 1', { a: 1 });
+
+        var changeEventA = false;
+        var changeEvent = false;
+        var addEvent = false;
+
+        filtered.on('add', function() {
+          addEvent = true;
+        });
+
+        filtered.on('change', function() {
+          changeEvent = true;
+        });
+
+        filtered.on('change:a', function() {
+          changeEventA = true;
+        });
+
+        // The last model in the set should have a = 2
+        // and not be present in the filtered collection
+        var lastModel = superset.last();
+
+        // However if we change the 'a' parameter to 1,
+        // it should show up in the filtered collection
+        lastModel.set({ a: 1 });
+        assert(addEvent);
+        assert(!changeEvent);
+        assert(!changeEventA);
+      });
+
     });
 
-    it('a model changes to not fit the filter function', function() {
-      // Add a filter on the 'a' key
-      // This leaves 3 models
-      filtered.filterBy('a = 1', { a: 1 });
+    describe('a model changes to not fit the filter function', function() {
 
-      // The first model in the set should have a = 1
-      // and be present in the filtered collection
-      var firstModel = superset.first();
-      assert(firstModel.get('a') === 1);
-      assert(filtered.contains(firstModel));
+      it('should be removed from the filtered collection', function() {
+        // Add a filter on the 'a' key
+        // This leaves 3 models
+        filtered.filterBy('a = 1', { a: 1 });
 
-      // However if we change the 'a' parameter to 2,
-      // it should disappear from the filtered collection
-      firstModel.set({ a: 2 });
-      assert(filtered.length === 2);
-      assert(filtered.contains(firstModel) === false);
+        // The first model in the set should have a = 1
+        // and be present in the filtered collection
+        var firstModel = superset.first();
+        assert(firstModel.get('a') === 1);
+        assert(filtered.contains(firstModel));
+
+        // However if we change the 'a' parameter to 2,
+        // it should disappear from the filtered collection
+        firstModel.set({ a: 2 });
+        assert(filtered.length === 2);
+        assert(filtered.contains(firstModel) === false);
+      });
+
+      it('change event should not fire, only remove', function() {
+        // Add a filter on the 'a' key
+        // This leaves 3 models
+        filtered.filterBy('a = 1', { a: 1 });
+
+        var removeEvent = false;
+        var changeEvent = false;
+        var changeEventA = false;
+
+        filtered.on('change', function() {
+          changeEvent = true;
+        });
+
+        filtered.on('change:a', function() {
+          changeEventA = true;
+        });
+
+        filtered.on('remove', function() {
+          removeEvent = true;
+        });
+
+        // The first model in the set should have a = 1
+        // and be present in the filtered collection
+        var firstModel = superset.first();
+        assert(firstModel.get('a') === 1);
+        assert(filtered.contains(firstModel));
+
+        // If we change the 'a' parameter to 2,
+        // it should disappear from the filtered collection
+        firstModel.set({ a: 2 });
+        assert(removeEvent);
+        assert(!changeEvent);
+        assert(!changeEventA);
+      });
+
     });
 
   });

@@ -38,18 +38,6 @@ function removeFilter(filterName) {
   this.trigger('filtered:remove', filterName);
 }
 
-function execFilter() {
-  var filtered = [];
-
-  // Filter the collection
-  if (this._superset) {
-    filtered = this._superset.filter(_.bind(execFilterOnModel, this));
-  }
-
-  this._collection.reset(filtered);
-  this.length = this._collection.length;
-}
-
 function execFilterOnModel(model) {
   if (!this._filterResultCache[model.cid]) {
     this._filterResultCache[model.cid] = {};
@@ -71,6 +59,18 @@ function execFilterOnModel(model) {
   return true;
 }
 
+function execFilter() {
+  var filtered = [];
+
+  // Filter the collection
+  if (this._superset) {
+    filtered = this._superset.filter(_.bind(execFilterOnModel, this));
+  }
+
+  this._collection.reset(filtered);
+  this.length = this._collection.length;
+}
+
 function onModelChange(model) {
   // reset the cached results
   this._filterResultCache[model.cid] = {};
@@ -85,6 +85,29 @@ function onModelChange(model) {
     }
   }
   this.length = this._collection.length;
+}
+
+// This fires on 'change:[attribute]' events. We only want to
+// remove this model if it fails the test, but not add it if
+// it does. If we remove it, it will prevent the 'change'
+// events from being forwarded, and if we add it, it will cause
+// an unneccesary 'change' event to be forwarded without the
+// 'change:[attribute]' that goes along with it.
+function onModelAttributeChange(model) {
+  // reset the cached results
+  this._filterResultCache[model.cid] = {};
+
+  if (!execFilterOnModel.call(this, model)) {
+    if (this._collection.get(model.cid)) {
+      this._collection.remove(model);
+    }
+  }
+}
+
+function onAll(eventName, model, value) {
+  if (eventName.slice(0, 7) === "change:") {
+    onModelAttributeChange.call(this, arguments[1]);
+  }
 }
 
 function onModelRemove(model) {
@@ -110,6 +133,7 @@ function Filtered(superset) {
   this.listenTo(this._superset, 'add', onModelChange);
   this.listenTo(this._superset, 'change', onModelChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
+  this.listenTo(this._superset, 'all', onAll);
 }
 
 var methods = {

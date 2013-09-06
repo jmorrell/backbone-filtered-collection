@@ -51,18 +51,6 @@ function removeFilter(filterName) {
   this.trigger('filtered:remove', filterName);
 }
 
-function execFilter() {
-  var filtered = [];
-
-  // Filter the collection
-  if (this._superset) {
-    filtered = this._superset.filter(_.bind(execFilterOnModel, this));
-  }
-
-  this._collection.reset(filtered);
-  this.length = this._collection.length;
-}
-
 function execFilterOnModel(model) {
   if (!this._filterResultCache[model.cid]) {
     this._filterResultCache[model.cid] = {};
@@ -84,6 +72,18 @@ function execFilterOnModel(model) {
   return true;
 }
 
+function execFilter() {
+  var filtered = [];
+
+  // Filter the collection
+  if (this._superset) {
+    filtered = this._superset.filter(_.bind(execFilterOnModel, this));
+  }
+
+  this._collection.reset(filtered);
+  this.length = this._collection.length;
+}
+
 function onModelChange(model) {
   // reset the cached results
   this._filterResultCache[model.cid] = {};
@@ -98,6 +98,29 @@ function onModelChange(model) {
     }
   }
   this.length = this._collection.length;
+}
+
+// This fires on 'change:[attribute]' events. We only want to
+// remove this model if it fails the test, but not add it if
+// it does. If we remove it, it will prevent the 'change'
+// events from being forwarded, and if we add it, it will cause
+// an unneccesary 'change' event to be forwarded without the
+// 'change:[attribute]' that goes along with it.
+function onModelAttributeChange(model) {
+  // reset the cached results
+  this._filterResultCache[model.cid] = {};
+
+  if (!execFilterOnModel.call(this, model)) {
+    if (this._collection.get(model.cid)) {
+      this._collection.remove(model);
+    }
+  }
+}
+
+function onAll(eventName, model, value) {
+  if (eventName.slice(0, 7) === "change:") {
+    onModelAttributeChange.call(this, arguments[1]);
+  }
 }
 
 function onModelRemove(model) {
@@ -123,6 +146,7 @@ function Filtered(superset) {
   this.listenTo(this._superset, 'add', onModelChange);
   this.listenTo(this._superset, 'change', onModelChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
+  this.listenTo(this._superset, 'all', onAll);
 }
 
 var methods = {
@@ -202,23 +226,35 @@ var blacklistedMethods = [
   "listenTo", "listenToOnce", "bind", "trigger", "once", "stopListening"
 ];
 
+var eventWhiteList = [
+  'add', 'remove', 'reset', 'sort', 'destroy'
+];
+
 function proxyCollection(from, target) {
 
   function updateLength() {
     target.length = from.length;
   }
 
-  function pipeEvents() {
+  function pipeEvents(eventName) {
     var args = _.toArray(arguments);
+    var isChangeEvent = eventName === 'change' ||
+                        eventName.slice(0, 7) === 'change:';
 
-    // replace any references to `from` with `this`
-    for (var i = 1; i < args.length; i++) {
-      if (args[i] && args[i].length && args[i].length === from.length) {
-        args[i] = this;
+    if (_.contains(eventWhiteList, eventName)) {
+      if (_.contains(['add', 'remove', 'destory'], eventName)) {
+        args[2] = target;
+      } else if (_.contains(['reset', 'sort'], eventName)) {
+        args[1] = target;
+      }
+      target.trigger.apply(this, args);
+    } else if (isChangeEvent) {
+      // In some cases I was seeing change events fired after the model
+      // had already been removed from the collection.
+      if (target.contains(args[1])) {
+        target.trigger.apply(this, args);
       }
     }
-
-    this.trigger.apply(this, args);
   }
 
   var methods = {};
