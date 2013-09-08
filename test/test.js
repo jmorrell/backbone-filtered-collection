@@ -432,6 +432,20 @@ describe('filtered collection', function() {
         assert(filtered.contains(lastModel));
       });
 
+      it('should be added to the filtered collection at the correct index', function() {
+        filtered.filterBy('b = 2', { b: 2 });
+
+        var model = superset.at(1);
+        assert(filtered.length === 3);
+        assert(model.get('b') === 3);
+        assert(filtered.contains(model) === false);
+
+        model.set({ b: 2 });
+        assert(filtered.length === 4);
+        assert(filtered.contains(model));
+        assert(filtered.at(1) === model);
+      });
+
       it('should not fire a change event', function() {
         // Add a filter on the 'a' key
         // This leaves 3 models
