@@ -569,7 +569,156 @@ describe('filtered collection', function() {
     });
 
   });
-  //
+
+  describe('adding a model in the superset', function() {
+
+    describe("that doesn't match the filter", function() {
+
+      beforeEach(function() {
+        filtered.filterBy('a = 1', { a: 1 });
+      });
+
+      it('should not change the filtered collection', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var previousValue = filtered.toJSON();
+        superset.add(model);
+
+        assert(filtered.length === 3);
+        assert(_.isEqual(previousValue, filtered.toJSON()));
+      });
+
+
+      it('should not change the filtered collection when added at an index', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var previousValue = filtered.toJSON();
+        superset.add(model, { at: 2 });
+
+        assert(filtered.length === 3);
+        assert(_.isEqual(previousValue, filtered.toJSON()));
+      });
+
+      it('should not fire any events', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var addEvent = false;
+        var removeEvent = false;
+        var resetEvent = false;
+
+        filtered.on('add', function() { addEvent = true; });
+        filtered.on('remove', function() { removeEvent = true; });
+        filtered.on('reset', function() { resetEvent = true; });
+
+        superset.add(model);
+
+        assert(!addEvent);
+        assert(!removeEvent);
+        assert(!resetEvent);
+      });
+
+    });
+
+    describe("that does match the filter", function() {
+
+      beforeEach(function() {
+        filtered.filterBy('b = 2', { b: 2 });
+      });
+
+      it('should change the filtered collection', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        superset.add(model);
+
+        assert(filtered.length === 4);
+        assert(filtered.at(0) === superset.at(0));
+        assert(filtered.at(1) === superset.at(3));
+        assert(filtered.at(2) === superset.at(4));
+        assert(filtered.at(3) === superset.at(5));
+        assert(filtered.at(3) === model);
+      });
+
+      it('should change the filtered collection when added at an index', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        superset.add(model, { at: 4 });
+
+        assert(filtered.length === 4);
+        assert(filtered.at(0) === superset.at(0));
+        assert(filtered.at(1) === superset.at(3));
+        assert(filtered.at(2) === superset.at(4));
+        assert(filtered.at(2) === model);
+        assert(filtered.at(3) === superset.at(5));
+      });
+
+      it('should fire an add event', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var addEvent = false;
+        var removeEvent = false;
+        var resetEvent = false;
+
+        filtered.on('add', function() { addEvent = true; });
+        filtered.on('remove', function() { removeEvent = true; });
+        filtered.on('reset', function() { resetEvent = true; });
+
+        superset.add(model);
+
+        assert(addEvent);
+        assert(!removeEvent);
+        assert(!resetEvent);
+      });
+
+      it('should fire an add event when added at an index', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var addEvent = false;
+        var removeEvent = false;
+        var resetEvent = false;
+
+        filtered.on('add', function() { addEvent = true; });
+        filtered.on('remove', function() { removeEvent = true; });
+        filtered.on('reset', function() { resetEvent = true; });
+
+        superset.add(model, { at: 1 });
+
+        assert(addEvent);
+        assert(!removeEvent);
+        assert(!resetEvent);
+      });
+
+      it('should pass along the `at` parameter', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var addOptions = false;
+
+        filtered.on('add', function(model, collection, options) {
+          addOptions = options;
+        });
+
+        superset.add(model, { at: 1 });
+
+        assert(addOptions.at === 1);
+      });
+
+      it('should modify the `at` parameter appropriately', function() {
+        var model = new Backbone.Model({ a: 3, b: 2, c: '1' });
+
+        var addOptions = false;
+
+        filtered.on('add', function(model, collection, options) {
+          addOptions = options;
+        });
+
+        superset.add(model, { at: 4 });
+
+        assert(addOptions.at === 2);
+      });
+
+    });
+
+  });
+
   describe('destroying a model in the superset', function() {
 
     it("no update when already filtered", function() {
