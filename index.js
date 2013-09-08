@@ -71,13 +71,27 @@ function execFilter() {
   this.length = this._collection.length;
 }
 
-function onModelChange(model) {
+function onAddChange(model) {
   // reset the cached results
   this._filterResultCache[model.cid] = {};
 
   if (execFilterOnModel.call(this, model)) {
     if (!this._collection.get(model.cid)) {
-      this._collection.add(model);
+      var index = this.superset().indexOf(model);
+
+      // Find the index at which to insert the model in the
+      // filtered collection by finding the index of the
+      // previous non-filtered model in the filtered collection
+      var filteredIndex = null;
+      for (var i = index - 1; i >= 0; i -= 1) {
+        if (this.contains(this.superset().at(i))) {
+          filteredIndex = this.indexOf(this.superset().at(i)) + 1;
+          break;
+        }
+      }
+      filteredIndex = filteredIndex || 0;
+
+      this._collection.add(model, { at: filteredIndex });
     }
   } else {
     if (this._collection.get(model.cid)) {
@@ -130,8 +144,7 @@ function Filtered(superset) {
   this.resetFilters();
 
   this.listenTo(this._superset, 'reset', execFilter);
-  this.listenTo(this._superset, 'add', onModelChange);
-  this.listenTo(this._superset, 'change', onModelChange);
+  this.listenTo(this._superset, 'add change', onAddChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
   this.listenTo(this._superset, 'all', onAll);
 }
@@ -182,7 +195,7 @@ var methods = {
   refilter: function(arg) {
     if (typeof arg === "object" && arg.cid) {
       // is backbone model, refilter that one
-      onModelChange.call(this, arg);
+      onAddChange.call(this, arg);
     } else {
       // refilter everything
       invalidateCache.call(this);
