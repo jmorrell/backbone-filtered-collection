@@ -1,3 +1,7 @@
+v0.3.0
+
+* Made the collection preserve the same ordering of the superset
+* Fixed bugs with event ordering
 
 v0.2.0
 

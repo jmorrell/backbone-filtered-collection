@@ -1,7 +1,7 @@
 {
   "name": "backbone-filtered-collection",
   "description": "Create a filtered version of a backbone collection that stays in sync.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "homepage": "http://github.com/jmorrell/backbone-filtered-collection",
   "keywords": [ "backbone", "plugin", "filtering", "filter", "collection", "client", "browser" ],
   "main": "backbone-filtered-collection.js",
