@@ -203,6 +203,15 @@ var methods = {
     }
 
     return this;
+  },
+
+  destroy: function() {
+    this.stopListening();
+    this._collection.reset([]);
+    this._superset = this._collection;
+    this.length = 0;
+
+    this.trigger('filtered:destroy');
   }
 
 };

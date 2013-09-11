@@ -135,6 +135,11 @@ Can also be forced to run on one model in particular.
 filtered.refilter(model);
 ```
 
+### filtered.destroy()
+
+Remove all ties to the superset and stop updating. Will now be garbage 
+collected when it falls out of scope.
+
 ## Events
 
 `add`, `remove`, `change`, `reset` should fire as you expect.
@@ -144,6 +149,8 @@ filtered.refilter(model);
 `filtered:remove` - Fired with a filter is removed. Passes the filter name.
 
 `filtered:reset` - Fired when all of the filters are removed.
+
+`filtered:destroy' - Fired when the proxy is destroyed
 
 ## Testing
 
