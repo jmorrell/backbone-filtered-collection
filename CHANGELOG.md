@@ -1,3 +1,7 @@
+v0.3.1
+
+* Added ability to destroy proxy
+
 v0.3.0
 
 * Made the collection preserve the same ordering of the superset
