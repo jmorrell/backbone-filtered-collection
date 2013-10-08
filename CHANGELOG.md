@@ -1,3 +1,8 @@
+v0.3.2
+
+* Added `getFilters` method
+* Added `hasFIlter` method
+
 v0.3.1
 
 * Added ability to destroy proxy
