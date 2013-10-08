@@ -112,6 +112,24 @@ Removes all applied filters. After the collection should be the same as the supe
 filtered.resetFilters();
 ```
 
+#### filtered.getFilters()
+
+Returns a list of the names of applied filters.
+
+*Note:* If added a filter with no name, it will show up here as `__default`.
+
+```javascript
+filtered.getFilters();
+```
+
+#### filtered.hasFilter()
+
+Given a string, return whether or not that filter is currently applied.
+
+```javascript
+filtered.hasFilter('name');
+```
+
 #### filtered.superset()
 
 Return a reference to the original collection.
