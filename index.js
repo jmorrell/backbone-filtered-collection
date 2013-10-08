@@ -205,6 +205,14 @@ var methods = {
     return this;
   },
 
+  getFilters: function() {
+    return  _.keys(this._filters);
+  },
+
+  hasFilter: function(name) {
+    return _.contains(this.getFilters(), name);
+  },
+
   destroy: function() {
     this.stopListening();
     this._collection.reset([]);
