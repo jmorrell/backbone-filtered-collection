@@ -1,7 +1,7 @@
 v0.3.2
 
 * Added `getFilters` method
-* Added `hasFIlter` method
+* Added `hasFilter` method
 
 v0.3.1
 
