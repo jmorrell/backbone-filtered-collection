@@ -29,7 +29,7 @@
   "dependencies": {
     "backbone": "~1.0.0",
     "underscore": "~1.5.1",
-    "backbone-collection-proxy": "~0.1.0"
+    "backbone-collection-proxy": "~0.2.0"
   },
   "devDependencies": {
     "karma-script-launcher": "~0.1.0",

@@ -243,7 +243,9 @@ _.extend(Filtered.prototype, methods, Backbone.Events);
 module.exports = Filtered;
 
 
-},{"./src/create-filter.js":4,"backbone":false,"backbone-collection-proxy":2,"underscore":false}],2:[function(require,module,exports){
+},{"./src/create-filter.js":4,"backbone":false,"backbone-collection-proxy":3,"underscore":false}],"backbone-filtered-collection":[function(require,module,exports){
+module.exports=require('cGCOHh');
+},{}],3:[function(require,module,exports){
 
 var _ = require('underscore');
 var Backbone = require('backbone');
@@ -270,6 +272,12 @@ function proxyCollection(from, target) {
     var args = _.toArray(arguments);
     var isChangeEvent = eventName === 'change' ||
                         eventName.slice(0, 7) === 'change:';
+
+    // In the case of a `reset` event, the Collection.models reference
+    // is updated to a new array, so we need to update our reference.
+    if (eventName === 'reset') {
+      target.models = from.models;
+    }
 
     if (_.contains(eventWhiteList, eventName)) {
       if (_.contains(['add', 'remove', 'destory'], eventName)) {
@@ -301,6 +309,7 @@ function proxyCollection(from, target) {
 
   target.listenTo(from, 'all', updateLength);
   target.listenTo(from, 'all', pipeEvents);
+  target.models = from.models;
 
   updateLength();
   return target;
@@ -309,9 +318,7 @@ function proxyCollection(from, target) {
 module.exports = proxyCollection;
 
 
-},{"backbone":false,"underscore":false}],"backbone-filtered-collection":[function(require,module,exports){
-module.exports=require('cGCOHh');
-},{}],4:[function(require,module,exports){
+},{"backbone":false,"underscore":false}],4:[function(require,module,exports){
 
 
 // Converts a key and value into a function that accepts a model
