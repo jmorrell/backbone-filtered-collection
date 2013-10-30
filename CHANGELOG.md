@@ -1,3 +1,7 @@
+v0.3.3
+
+* Updated build with latest backbone-collection-proxy version.
+
 v0.3.2
 
 * Added `getFilters` method
