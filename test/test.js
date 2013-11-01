@@ -1219,7 +1219,7 @@ describe('filtered collection', function() {
       superset.comparator = 'n';
       superset.sort();
 
-      assert(_.isEqual(filtered.pluck('n'), _.range(1, 101, 2)));
+      assert(_.isEqual(filtered.pluck('n'), _.range(2, 101, 2)));
     });
 
   });

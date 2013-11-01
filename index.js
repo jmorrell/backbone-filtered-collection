@@ -143,7 +143,7 @@ function Filtered(superset) {
   // Set up the filter data structures
   this.resetFilters();
 
-  this.listenTo(this._superset, 'reset', execFilter);
+  this.listenTo(this._superset, 'reset sort', execFilter);
   this.listenTo(this._superset, 'add change', onAddChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
   this.listenTo(this._superset, 'all', onAll);
