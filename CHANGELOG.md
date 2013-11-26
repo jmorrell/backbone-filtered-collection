@@ -1,3 +1,7 @@
+v0.3.5
+
+* Blow away the cache instead of iterating over it one at a time
+
 v0.3.4
 
 * Recalculate pagination on `sort`
