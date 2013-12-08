@@ -27,8 +27,8 @@
     "test": "./node_modules/.bin/karma start --browsers Firefox --single-run"
   },
   "dependencies": {
-    "backbone": "~1.0.0",
-    "underscore": "~1.5.1",
+    "backbone": ">=1.0.0",
+    "underscore": ">=1.5.1",
     "backbone-collection-proxy": "~0.2.0"
   },
   "devDependencies": {
