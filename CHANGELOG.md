@@ -1,3 +1,7 @@
+v0.3.6
+
+* Update dependency version requirements
+
 v0.3.5
 
 * Blow away the cache instead of iterating over it one at a time
