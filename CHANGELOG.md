@@ -1,3 +1,7 @@
+v0.3.7
+
+* Add a missing require call that caused an issue when browserifying.
+
 v0.3.6
 
 * Update dependency version requirements
