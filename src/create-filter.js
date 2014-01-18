@@ -1,4 +1,4 @@
-
+var _ = require('underscore');
 
 // Converts a key and value into a function that accepts a model
 // and returns a boolean.
