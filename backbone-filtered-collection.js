@@ -277,7 +277,7 @@ function proxyCollection(from, target) {
     }
 
     if (_.contains(eventWhiteList, eventName)) {
-      if (_.contains(['add', 'remove', 'destory'], eventName)) {
+      if (_.contains(['add', 'remove', 'destroy'], eventName)) {
         args[2] = target;
       } else if (_.contains(['reset', 'sort'], eventName)) {
         args[1] = target;
@@ -316,7 +316,7 @@ module.exports = proxyCollection;
 
 
 },{"backbone":false,"underscore":false}],4:[function(require,module,exports){
-
+var _ = require('underscore');
 
 // Converts a key and value into a function that accepts a model
 // and returns a boolean.
@@ -398,7 +398,7 @@ function createFilter(filter, keys) {
 module.exports = createFilter;
 
 
-},{}]},{},[])
+},{"underscore":false}]},{},[])
 ;
 return require('backbone-filtered-collection');
 
