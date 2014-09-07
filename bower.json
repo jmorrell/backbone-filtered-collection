@@ -20,7 +20,8 @@
   ],
   "dependencies": {
     "backbone": ">=1.0.0",
-    "underscore": ">=1.5.1"
+    "underscore": ">=1.5.1",
+    "backbone-collection-proxy": ">=0.2.1"
   },
   "devDependencies": {
     "chai": "*",
