@@ -1,3 +1,7 @@
+v0.3.8
+
+* Update dependency and build
+
 v0.3.7
 
 * Add a missing require call that caused an issue when browserifying.
