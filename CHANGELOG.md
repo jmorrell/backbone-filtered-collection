@@ -1,3 +1,7 @@
+v0.4.0
+
+* Updated build to cjs-umd instead of grunt
+
 v0.3.8
 
 * Update dependency and build
