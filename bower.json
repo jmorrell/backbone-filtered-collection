@@ -8,7 +8,7 @@
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "a5df1628ef34b368eaf4d1fd2d3db10f2fb12fd2"
+    "commit": "b8ea327b8127a9795a885b23fb4079cf5e2a47f0"
   },
   "ignore": [
     "test",
