@@ -1,14 +1,22 @@
 {
   "name": "backbone-filtered-collection",
   "description": "Create a filtered version of a backbone collection that stays in sync.",
-  "version": "0.3.7",
-  "homepage": "http://github.com/jmorrell/backbone-filtered-collection",
-  "keywords": [ "backbone", "plugin", "filtering", "filter", "collection", "client", "browser" ],
+  "version": "0.4.0",
+  "homepage": "http://github.com/ddavydov/backbone-filtered-collection",
+  "keywords": [
+    "backbone",
+    "plugin",
+    "filtering",
+    "filter",
+    "collection",
+    "client",
+    "browser"
+  ],
   "main": "backbone-filtered-collection.js",
   "license": "MIT",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/jmorrell/backbone-filtered-collection.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ddavydov/backbone-filtered-collection.git"
   },
   "ignore": [
     "test",
@@ -26,5 +34,14 @@
     "chai": "*",
     "backbone": ">=1.0.0",
     "underscore": ">=1.5.1"
-  }
+  },
+  "_release": "0.4.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.4.0",
+    "commit": "9c54a7f055c1cc29d4022ff950bdcdac2c859c3b"
+  },
+  "_source": "git://github.com/ddavydov/backbone-filtered-collection.git",
+  "_target": "*",
+  "_originalSource": "git://github.com/ddavydov/backbone-filtered-collection"
 }
