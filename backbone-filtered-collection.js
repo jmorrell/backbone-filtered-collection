@@ -70,7 +70,7 @@
                 for (var filterName in this._filters) {
                     if (this._filters.hasOwnProperty(filterName)) {
                         if (!cache.hasOwnProperty(filterName)) {
-                            cache[filterName] = this._filters[filterName].fn(model);
+                            cache[filterName] = this._filters[filterName].fn.call(this, model);
                         }
                         if (!cache[filterName]) {
                             return false;
@@ -79,10 +79,17 @@
                 }
                 return true;
             }
-            function execFilter() {
+            function execFilter(options) {
+                if(!options) {
+                    options = {};
+                }
+
                 var filtered = [];
                 if (this._superset) {
                     filtered = this._superset.filter(_.bind(execFilterOnModel, this));
+                    if(options.sortBy && _.isFunction(options.sortBy)) {
+                        filtered = _.sortBy(filtered, _.bind(options.sortBy, this));
+                    }
                 }
                 this._collection.reset(filtered);
                 this.length = this._collection.length;
@@ -137,16 +144,18 @@
                 this.listenTo(this._superset, 'add change', onAddChange);
                 this.listenTo(this._superset, 'remove', onModelRemove);
                 this.listenTo(this._superset, 'all', onAll);
+                this.initialize.apply(this, arguments);
             }
             var methods = {
                     defaultFilterName: '__default',
-                    filterBy: function (filterName, filter) {
+                    initialize: function(){},
+                    filterBy: function (filterName, filter, options) {
                         if (!filter) {
                             filter = filterName;
                             filterName = this.defaultFilterName;
                         }
                         addFilter.call(this, filterName, createFilter(filter));
-                        execFilter.call(this);
+                        execFilter.call(this, options);
                         return this;
                     },
                     removeFilter: function (filterName) {
