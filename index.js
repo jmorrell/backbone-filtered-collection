@@ -47,7 +47,7 @@ function execFilterOnModel(model) {
     if (this._filters.hasOwnProperty(filterName)) {
       // if we haven't already calculated this, calculate it and cache
       if (!cache.hasOwnProperty(filterName)) {
-        cache[filterName] = this._filters[filterName].fn(model);
+        cache[filterName] = this._filters[filterName].fn.call(this, model);
       }
       if (!cache[filterName]) {
         return false;
@@ -57,12 +57,18 @@ function execFilterOnModel(model) {
   return true;
 }
 
-function execFilter() {
+function execFilter(options) {
+  if(!options) {
+    options = {};
+  }
   var filtered = [];
 
   // Filter the collection
   if (this._superset) {
     filtered = this._superset.filter(_.bind(execFilterOnModel, this));
+	if(options.sortBy && _.isFunction(options.sortBy)) {
+      filtered = _.sortBy(filtered, _.bind(options.sortBy, this));
+    }
   }
 
   this._collection.reset(filtered);
@@ -145,13 +151,14 @@ function Filtered(superset) {
   this.listenTo(this._superset, 'add change', onAddChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
   this.listenTo(this._superset, 'all', onAll);
+  this.initialize.apply(this, arguments);
 }
 
 var methods = {
 
   defaultFilterName: '__default',
 
-  filterBy: function(filterName, filter) {
+  filterBy: function (filterName, filter, options) {
     // Allow the user to skip the filter name if they're only using one filter
     if (!filter) {
       filter = filterName;
@@ -160,9 +167,11 @@ var methods = {
 
     addFilter.call(this, filterName, createFilter(filter));
 
-    execFilter.call(this);
+    execFilter.call(this, options);
     return this;
   },
+
+  initialize: function(){},
 
   removeFilter: function(filterName) {
     if (!filterName) {
