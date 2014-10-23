@@ -69,6 +69,11 @@ function execFilter() {
   this.length = this._collection.length;
 }
 
+function execSort() {
+  this._collection.comparator = this._superset.comparator;
+  this._collection.sort()
+}
+
 function onAddChange(model) {
   // reset the cached results
   this._filterResultCache[model.cid] = {};
@@ -141,7 +146,8 @@ function Filtered(superset) {
   // Set up the filter data structures
   this.resetFilters();
 
-  this.listenTo(this._superset, 'reset sort', execFilter);
+  this.listenTo(this._superset, 'reset', execFilter);
+  this.listenTo(this._superset, 'sort', execSort);
   this.listenTo(this._superset, 'add change', onAddChange);
   this.listenTo(this._superset, 'remove', onModelRemove);
   this.listenTo(this._superset, 'all', onAll);
