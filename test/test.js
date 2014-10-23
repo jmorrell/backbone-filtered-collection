@@ -1222,6 +1222,19 @@ describe('filtered collection', function() {
       assert(_.isEqual(filtered.pluck('n'), _.range(2, 101, 2)));
     });
 
+    it('does not reset the filtered collection', function() {
+      var called = false;
+
+      filtered.on('reset', function() {
+        called = true;
+      });
+
+      superset.comparator = 'n';
+      superset.sort();
+
+      assert(!called);
+    });
+
   });
 
 });
