@@ -67,6 +67,7 @@ function execFilter() {
 
   this._collection.reset(filtered);
   this.length = this._collection.length;
+  this.trigger('change');
 }
 
 function onAddChange(model) {
