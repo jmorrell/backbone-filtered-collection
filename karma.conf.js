@@ -6,19 +6,18 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'bower_components/underscore/underscore.js',
-      'bower_components/backbone/backbone.js',
+      'node_modules/underscore/underscore.js',
+      'node_modules/backbone/backbone.js',
       'backbone-filtered-collection.js',
-      'bower_components/chai/chai.js',
       'test/**/*.js'
     ],
 
-    frameworks: ["mocha"],
+    frameworks: ['mocha', 'chai'],
 
     // use dots reporter, as travis terminal does not support escaping sequences
     // possible values: 'dots', 'progress', 'junit', 'teamcity'
     // CLI --reporters progress
-    reporters: ['dots'],
+    reporters: ['mocha'],
 
     // web server port
     // CLI --port 9876
@@ -66,6 +65,8 @@ module.exports = function(config) {
 
     plugins: [
       'karma-mocha',
+      'karma-chai',
+      'karma-mocha-reporter',
       'karma-firefox-launcher'
     ]
 
