@@ -1,7 +1,9 @@
 var _ = require('underscore');
 var Backbone = require('backbone');
 var proxyCollection = require('backbone-collection-proxy');
-var createFilter = require('./src/create-filter.js');
+var backboneQuery = require('backbone-query');
+var Parser = require('query-parser');
+var parse = new Parser();
 
 // Beware of `this`
 // All of the following functions are meant to be called in the context
@@ -47,7 +49,7 @@ function execFilterOnModel(model) {
     if (this._filters.hasOwnProperty(filterName)) {
       // if we haven't already calculated this, calculate it and cache
       if (!cache.hasOwnProperty(filterName)) {
-        cache[filterName] = this._filters[filterName].fn(model);
+        cache[filterName] = this._filters[filterName].fn(model, this._filters[filterName].tokens);
       }
       if (!cache[filterName]) {
         return false;
@@ -152,16 +154,46 @@ var methods = {
   defaultFilterName: '__default',
 
   filterBy: function(filterName, filter) {
+    var filterObj;
+
     // Allow the user to skip the filter name if they're only using one filter
     if (!filter) {
       filter = filterName;
       filterName = this.defaultFilterName;
     }
 
-    addFilter.call(this, filterName, createFilter(filter));
+    if (_.isFunction(filter)){
+      filterObj = { fn: filter };
+    } else {
+      filterObj = {
+        fn: backboneQuery,
+        tokens: this.parseFilter(filter)
+      }
+    }
+
+    addFilter.call(this, filterName, filterObj);
 
     execFilter.call(this);
     return this;
+  },
+
+  parseFilter: function(filter){
+    if (_.isArray(filter)) {
+      return filter;
+    }
+    if (_.isString(filter)) {
+      return parse(filter);
+    }
+    if (_.isObject(filter)) {
+      return _.reduce(filter, function(result, value, key){
+        result.push({
+          type: 'prefix',
+          prefix: key,
+          query: value
+        });
+        return result;
+      }, []);
+    }
   },
 
   removeFilter: function(filterName) {
