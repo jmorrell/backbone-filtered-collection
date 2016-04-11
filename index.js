@@ -70,6 +70,8 @@ function execFilter() {
 }
 
 function onAddChange(model) {
+  var options = arguments[arguments.length - 1];
+
   // reset the cached results
   this._filterResultCache[model.cid] = {};
 
@@ -89,7 +91,7 @@ function onAddChange(model) {
       }
       filteredIndex = filteredIndex || 0;
 
-      this._collection.add(model, { at: filteredIndex });
+      this._collection.add(model, _.extend({ at: filteredIndex }, options));
     }
   } else {
     if (this._collection.get(model.cid)) {
